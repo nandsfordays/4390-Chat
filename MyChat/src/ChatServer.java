@@ -99,14 +99,7 @@ public class ChatServer implements Runnable  //so threads can be used
 	   }
    }
    
-   /*
-   private int findClient(int ID)
-   {  for (int i = 0; i < clientCount; i++)
-         if (clients[i].getID() == ID)
-            return i;
-      return -1;
-   }
-   */
+   
    
    public void handle(String input)  //this just forwards the message to the client thread
    {  
@@ -116,7 +109,8 @@ public class ChatServer implements Runnable  //so threads can be used
 	   }
 	   else
        {
-		   client.send(input); 
+		   //client.send(input); 
+		   System.out.println(input);
        } 
        
              
