@@ -1,96 +1,125 @@
-
 import java.net.*;
-import java.io.*; 
+import java.util.Scanner;
+import java.io.*;
 
 public class ChatClient implements Runnable
-{ 
-	// initialize socket and input output streams 
-	private Socket socket = null; 
+{  
+	private Socket socket = null;
 	private Thread thread = null;
-	private DataInputStream console = null; 
+	private Scanner  console   = null;  //private DataInputStream  console   = null;
 	private DataOutputStream streamOut = null;
-	private ChatClientThread client = null;
+	private ChatClientThread client    = null;
 
-	// constructor to put ip address and port 
-	public ChatClient(String serverName, int serverPort) 
-	{ 
-		// establish a connection 
-		System.out.println("Establishing connection. Please wait...");
-		try{ 
-			socket = new Socket(serverName, serverPort); 
-			System.out.println("Connected: " + socket); 
-			start();
-		} 
-		catch(UnknownHostException u) 
-		{ 
-			System.out.println("Host unknown: " + u.getMessage()); 
-		} 
-		catch(IOException i) 
-		{ 
-			System.out.println("Error: " + i.getMessage());
-		} 
-	}
-	public void run() {
-		while(thread != null) {
-			try {
-				streamOut.writeUTF(console.readLine());
-				streamOut.flush();
-			}
-			catch(IOException i) {
-				System.out.println("Sending error: " + i.getMessage());;
-				stop();
-			}
-		}
-	}
-	public void handle(String msg) {
-		if(msg.equals(".bye")) {
-			System.out.println("Good bye. Press ENTER to exit.");
-			stop();
-		}
-		else {
-			System.out.println(msg);
-		}
+	public static void main(String args[])
+	{  
+	   ChatClient client = null;
+	   Scanner scan = new Scanner(System.in);
+	   try
+	   {
+		   System.out.println("Please enter an integer for the port number.");
+		   int portnum = scan.nextInt();
+		   scan.close();
+		   client = new ChatClient("127.0.0.1",portnum);
+	   }
+	   catch(Exception e)
+	   {
+		   System.out.println("Error reading port number. Please enter an integer.");
+	   }
+	   
 	}
 	
-	
-	public void start() throws IOException {
-		console = new DataInputStream(System.in);
-		streamOut = new DataOutputStream(socket.getOutputStream());
-		if(thread == null) {
-			client = new ChatClientThread(this, socket);
-			thread = new Thread(this);
-			thread.start();
-			
-		}
-	}	
-	public void stop() {
-		if(thread != null) {
-			thread.stop();
-			thread = null;
-		}
-		try {
-			if(console != null) { console.close();}
-			if(streamOut != null) { streamOut.close();}
-			if(socket != null) { socket.close();}
-		}
-		catch(IOException i) {
-			System.out.println("Error closing.. " + i.getMessage());
-		}
-		client.close();
-//		client.stop();
-		}
-	public static void main(String args[]){ 
-		ChatClient client = null;
-	      if (args.length != 2) {
-	         System.out.println("Usage: java ChatClient host port");
-	      } else {
-	         client = new ChatClient(args[0], Integer.parseInt(args[1]));
-	      }
-	      }
-
+   public ChatClient(String serverName, int serverPort)
+   {  
+	   System.out.println("Establishing connection. Please wait ...");
+	   try
+	   {  
+		   socket = new Socket(serverName, serverPort);
+		   System.out.println("Connected: " + socket);
+		   start();
+	   }
+	   catch(UnknownHostException uhe)
+	   {  
+		   System.out.println("Host unknown: " + uhe.getMessage()); 
+	   }
+	   catch(IOException ioe)
+	   {  
+		   System.out.println("Unexpected exception: " + ioe.getMessage()); 
+	   }
+   }
+   
+   
+   public void run()
+   {  
+	   String deleteme = "";
+	   while (thread != null)
+	   {  
+		   try
+		   {  
+			   if(console.hasNext())
+			   {
+				   deleteme = console.nextLine();
+				   streamOut.writeUTF(deleteme);
+				   streamOut.flush();
+			   }
+			   
+		   }
+		   catch(IOException ioe)
+		   {  
+			   System.out.println("Sending error: " + ioe.getMessage());
+			   stop();
+		   }
+	   }
+   }
+   
+   
+   public void handle(String msg)
+   {  
+	   if (msg.equals(".bye"))
+	   {  
+		   System.out.println("Good bye. Press RETURN to exit ...");
+		   stop();
+	   }
+	   else
+	   {
+		   System.out.println(msg);
+	   }
+   }
+   
+   
+   public void start() throws IOException
+   {  
+	   console   = new Scanner(System.in);    //console   = new DataInputStream(System.in);
+	   streamOut = new DataOutputStream(socket.getOutputStream());
+	   if (thread == null)
+	   {  
+		   client = new ChatClientThread(this, socket);
+		   thread = new Thread(this);                   
+		   thread.start();
+	   }
+   }
+   
+   
+   public void stop()
+   {  
+	   if (thread != null)
+	   {  
+		   thread.stop();  
+		   thread = null;
+	   }
+	   try
+	   {  
+		   if (console   != null)  console.close();
+		   if (streamOut != null)  streamOut.close();
+		   if (socket    != null)  socket.close();
+	   }
+	   catch(IOException ioe)
+	   {  
+		   System.out.println("Error closing ..."); 
+	   }
+	   client.close();  
+	   client.stop();
+   }
+   
+   
+   
 }
-
-		
-		
-
-
