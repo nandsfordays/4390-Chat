@@ -9,6 +9,7 @@ public class ChatServer implements Runnable  //so threads can be used
 	private ChatServerThread client = null;
 	private ServerSocket server = null;
 	private Thread thread = null;
+	private Scanner  console   = null;
 
 	public static void main(String args[])
 	{  
@@ -33,7 +34,7 @@ public class ChatServer implements Runnable  //so threads can be used
    {  
 	   try
 	   {  
-		   System.out.println("Binding to port " + port);
+		   System.out.println("Connecting to port " + port);
 		   server = new ServerSocket(port);  
 		   System.out.println("Server started");
 		   start(); 
@@ -44,7 +45,46 @@ public class ChatServer implements Runnable  //so threads can be used
 	   }
    }
    
- //adds client
+   
+ //starts thread (calls run function)
+   public void start()
+   {  
+	   if (thread == null)
+	   {  
+		   thread = new Thread(this); 
+		   thread.start();
+	   }
+	   
+	   
+	   
+	   
+	   
+   }
+   
+   
+ //executes when thread is started
+   public void run()
+   {  
+	   while (thread != null)
+	   {  
+		   try
+		   {  
+			   System.out.println("Waiting for a client ..."); 
+			   addThread(server.accept()); 
+			   
+			   
+		   }
+		   catch(IOException ioe)
+		   {  
+			   System.out.println("Server accept error: " + ioe); stop(); 
+		   }
+		   
+		   
+	   }
+   }
+   
+   
+ //adds client. Uses socket from server.accept()
    private void addThread(Socket socket)
    {  
 	   
@@ -59,42 +99,21 @@ public class ChatServer implements Runnable  //so threads can be used
 	   {  
 		   System.out.println("Error opening thread: " + e); 
 	   } 
+	   
+	   
 	  
    }
    
-   //starts thread for client
-   public void start()
-   {  
-	   if (thread == null)
-	   {  
-		   thread = new Thread(this); 
-		   thread.start();
-	   }
-   }
    
-   //executes when thread is started
-   public void run()
-   {  
-	   while (thread != null)
-	   {  
-		   try
-		   {  
-			   System.out.println("Waiting for a client ..."); 
-			   addThread(server.accept()); 
-		   }
-		   catch(IOException ioe)
-		   {  
-			   System.out.println("Server accept error: " + ioe); stop(); 
-		   }
-	   }
-   }
+   
+   
    
    //executes when thread terminates
    public void stop()
    {  
 	   if (thread != null)
 	   {  
-		   thread.stop(); 
+		   //thread.stop(); 
 		   thread = null;
 	   }
    }

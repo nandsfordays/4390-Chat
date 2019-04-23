@@ -28,6 +28,7 @@ public class ChatClient implements Runnable
 	   
 	}
 	
+	//constructor
    public ChatClient(String serverName, int serverPort)
    {  
 	   System.out.println("Establishing connection. Please wait ...");
@@ -48,17 +49,37 @@ public class ChatClient implements Runnable
    }
    
    
+   public void start() throws IOException
+   {  
+	   console   = new Scanner(System.in);    //console   = new DataInputStream(System.in);
+	   streamOut = new DataOutputStream(socket.getOutputStream());
+	   if (thread == null)
+	   {  
+		   client = new ChatClientThread(this, socket);
+		   thread = new Thread(this);                   
+		   thread.start();
+	   }
+   }
+   
+   
    public void run()
    {  
-	   String deleteme = "";
+	   String msg = "";
 	   while (thread != null)
 	   {  
 		   try
 		   {  
-			   if(console.hasNext())
+			   if(console.hasNext())        //PLACE WHERE IM SENDING
 			   {
-				   deleteme = console.nextLine();
-				   streamOut.writeUTF(deleteme);
+				   msg = console.nextLine();
+				   streamOut.writeUTF(msg);
+				   streamOut.flush();
+			   }
+			   //hard coded message
+			   else
+			   {
+				   msg = "Error reading from console";
+				   streamOut.writeUTF(msg);
 				   streamOut.flush();
 			   }
 			   
@@ -86,24 +107,14 @@ public class ChatClient implements Runnable
    }
    
    
-   public void start() throws IOException
-   {  
-	   console   = new Scanner(System.in);    //console   = new DataInputStream(System.in);
-	   streamOut = new DataOutputStream(socket.getOutputStream());
-	   if (thread == null)
-	   {  
-		   client = new ChatClientThread(this, socket);
-		   thread = new Thread(this);                   
-		   thread.start();
-	   }
-   }
+   
    
    
    public void stop()
    {  
 	   if (thread != null)
 	   {  
-		   thread.stop();  
+		   //thread.stop();  
 		   thread = null;
 	   }
 	   try
@@ -117,7 +128,7 @@ public class ChatClient implements Runnable
 		   System.out.println("Error closing ..."); 
 	   }
 	   client.close();  
-	   client.stop();
+	   //client.stop();
    }
    
    

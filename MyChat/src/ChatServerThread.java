@@ -25,23 +25,8 @@ public class ChatServerThread extends Thread
 	   streamOut = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
    }
    
-   public void send(String msg)
-   {   
-	   try
-       {  
-		   streamOut.writeUTF(msg);
-		   streamOut.flush();
-       }
-       catch(IOException e)
-       {  
-    	   System.out.println("error sending: " + e.getMessage());
-    	   stop();
-       }
-   }
    
-   
-   
-   //runs when thread runs
+   //runs when thread runs. Listens for messages from client
    public void run()
    {  System.out.println("Server Thread running.");
       while (true)
@@ -53,10 +38,29 @@ public class ChatServerThread extends Thread
     	  catch(IOException e)
     	  {  
     		  System.out.println("error reading: " + e.getMessage());
-    		  stop();
+    		  //stop();
     	  }
       }
    }
+   
+   
+   public void send(String msg)
+   {   
+	   try
+       {  
+		   streamOut.writeUTF(msg);
+		   streamOut.flush();
+       }
+       catch(IOException e)
+       {  
+    	   System.out.println("error sending: " + e.getMessage());
+    	   //stop();
+       }
+   }
+   
+   
+   
+  
    
   //closes socket and input/output streams
    public void close() throws IOException

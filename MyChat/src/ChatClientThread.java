@@ -28,17 +28,8 @@ public class ChatClientThread extends Thread
 			client.stop();
 		}
 	}
-	public void close()
-	{  
-		try
-		{  
-			if (streamIn != null) streamIn.close();
-		}
-		catch(IOException ioe)
-		{  
-			System.out.println("Error closing input stream: " + ioe);
-		}
-	}
+	
+	
 	public void run()
 	{  
 		while (true)
@@ -54,4 +45,20 @@ public class ChatClientThread extends Thread
 			}
 		}
 	}
+	
+	
+	public void close()
+	{  
+		try
+		{  
+			if (streamIn != null) streamIn.close();
+		}
+		catch(IOException ioe)
+		{  
+			System.out.println("Error closing input stream: " + ioe);
+		}
+	}
+	
+	
+	
 }
