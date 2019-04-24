@@ -62,6 +62,7 @@ public class Client {
                     //exit condition
                     if(msg.equals(".over"))
             		{
+                    	System.out.println("Connection terminated");
             			break;
             		}
                     
@@ -102,7 +103,7 @@ public class Client {
         	try
         	{
         		Scanner in = new Scanner(socket.getInputStream());
-        		PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+        		//PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
         		String msg = "";
             
         		//handler - loops and checks for input on console and server
@@ -110,41 +111,38 @@ public class Client {
         		{
             	
             	
-            	if(in.hasNextLine()) //reading from server and sending to console
-                {
-                	
-                	//read from server
-                	msg = in.nextLine();
-                	
-                	//ignore empty string
-                	if(msg.equals(""))
-            		{
-            			continue;
-            		}
-                	
-                	//send to console
-                    System.out.println("Server: "+msg);
-                    
-                    //exit condition
-                    if(msg.equals(".over"))
-            		{
-            			break;
-            		}
-                    
-                }
+	            	if(in.hasNextLine()) //reading from server and sending to console
+	                {
+	                	
+	                	//read from server
+	                	msg = in.nextLine();
+	                	
+	                	//ignore empty string
+	                	if(msg.equals(""))
+	            		{
+	            			continue;
+	            		}
+	                	
+	                	//send to console
+	                    System.out.println("Server: "+msg);
+	                    
+	                    //exit condition
+	                    if(msg.equals(".over"))
+	            		{
+	                    	System.out.println("Connection terminated");
+	            			break;
+	            		}
+	                    
+	                }
             	
-            }
+        		}
             in.close();
-        }
-        catch(Exception e)
-		{
-			System.out.println("Error :" + e.getMessage());
-		}
+        	}
+        	catch(Exception e)
+        	{
+        		System.out.println("Error :" + e.getMessage());
+        	}
         
-        //scan.close();
-        	
-        	
-        	
         }
 	}
 	

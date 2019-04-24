@@ -45,13 +45,13 @@ public class Server {
             pool.execute(new ChatServer(client));
                 
             
-
+          //read from console and send to client
             String msg = "";
             PrintWriter out = new PrintWriter(client.getOutputStream(), true);
             while(true)
             {
             	//will run while thread runs
-            	if(scan.hasNextLine()) //read from console and send to client
+            	if(scan.hasNextLine()) 
             	{
             		
             		//read from console
@@ -69,6 +69,7 @@ public class Server {
             		//exit condition
             		if(msg.equals(".over"))
             		{
+            			System.out.println("Connection terminated");
             			break;
             		}
             		
@@ -81,16 +82,14 @@ public class Server {
         {
  		   	System.out.println("Error :" + e.getMessage());
         }
+        
     }
 
     
     
     private static class ChatServer implements Runnable {
         private Socket socket;
-        int state = -1; //state does absolutely nothing, but it helped with debugging
         
-        //reading from console
-        //Scanner console = new Scanner(System.in);
         
         //constructor
         public ChatServer(Socket socket) 
@@ -107,18 +106,17 @@ public class Server {
             try 
             {
                 Scanner in = new Scanner(socket.getInputStream());
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                
                 
                 //handler. Loops until exit condition is reached
-                while (state != 0) 
+                while (true) 
                 {
                 	if(in.hasNextLine()) //read from client and send to console
                 	{
-                		state = 1;
                 		//read from client
                 		msg = in.nextLine();
                     	
-                		//nullifies empty strings
+                		//nullifies empty strings. Don't know if necessary
                 		if(msg.equals(""))
                 		{
                 			continue;
@@ -131,6 +129,7 @@ public class Server {
                     	//exit condition
                     	if(msg.equals(".over"))
                 		{
+                    		System.out.println("Connection terminated");
                 			break;
                 		}
                     	
@@ -140,7 +139,7 @@ public class Server {
                 	
                 }
                 
-                in.close(); //is this needed?
+                in.close();
             } 
             catch (Exception e) 
             {
