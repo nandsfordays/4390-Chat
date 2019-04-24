@@ -21,7 +21,8 @@ public class Server {
     	{
     		System.out.println("Please enter an integer for the port number.");
     		portnum = scan.nextInt();
-    		
+    		//clear buffer
+    		scan.nextLine();
     	}
     	catch(Exception e)
     	{
@@ -38,17 +39,43 @@ public class Server {
             System.out.println("The server is running...");
             ExecutorService pool = Executors.newFixedThreadPool(1);
             
-            //string msg for holding messages between client and server
-            String msg = "";
             
-            while (true) 
-            {
-            	//sends socket to ChatServer
-            	client = server.accept();
-                pool.execute(new ChatServer(client));
+        	//sends socket to ChatServer
+        	client = server.accept();
+            pool.execute(new ChatServer(client));
                 
+            
+
+            String msg = "";
+            PrintWriter out = new PrintWriter(client.getOutputStream(), true);
+            while(true)
+            {
+            	//will run while thread runs
+            	if(scan.hasNextLine()) //read from console and send to client
+            	{
+            		
+            		//read from console
+            		msg = scan.nextLine();
+            		
+            		//nullifies empty strings
+            		if(msg.equals(""))
+            		{
+            			continue;
+            		}
+            		
+            		//sends to client
+            		out.println(msg);
+            		
+            		//exit condition
+            		if(msg.equals(".over"))
+            		{
+            			break;
+            		}
+            		
+            	}
             }
             
+         scan.close();   
         }
         catch(Exception e)
         {
@@ -63,7 +90,7 @@ public class Server {
         int state = -1; //state does absolutely nothing, but it helped with debugging
         
         //reading from console
-        Scanner console = new Scanner(System.in);
+        //Scanner console = new Scanner(System.in);
         
         //constructor
         public ChatServer(Socket socket) 
@@ -99,7 +126,7 @@ public class Server {
                 		
                 		
                     	//writes to console
-                    	System.out.println(msg);
+                    	System.out.println("Client: "+msg);
                     	
                     	//exit condition
                     	if(msg.equals(".over"))
@@ -109,28 +136,6 @@ public class Server {
                     	
                 	}
                 	
-                	if(console.hasNextLine()) //read from console and send to client
-                	{
-                		state = 2;
-                		//read from console
-                		msg = console.nextLine();
-                		
-                		//nullifies empty strings
-                		if(msg.equals(""))
-                		{
-                			continue;
-                		}
-                		
-                		//sends to client
-                		out.println(msg);
-                		
-                		//exit condition
-                		if(msg.equals(".over"))
-                		{
-                			break;
-                		}
-                		
-                	}
                 	
                 	
                 }
@@ -159,102 +164,4 @@ public class Server {
     }
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	/*
-	
-	private ServerSocket server = null;
-	private Socket client = null;
-	private DataInputStream streamIn = null;
-	private DataOutputStream streamOut = null;
-	
-	public static void main(String args[])
-	{
-		Server myServer = null;
-		Scanner scan = new Scanner(System.in);
-		   try
-		   {
-			   System.out.println("Please enter an integer for the port number.");
-			   int portnum = scan.nextInt();
-			   scan.close();
-			   myServer = new Server(portnum);
-		   }
-		   catch(Exception e)
-		   {
-			   System.out.println("Error reading port number. Please enter an integer.");
-		   }
-	}
-	
-	
-	//constructor
-	public Server(int port)
-	{
-		try
-		{
-			//setup
-			server = new ServerSocket(port);
-			client = server.accept();
-			System.out.println("client accepted");
-			streamIn = new DataInputStream(new BufferedInputStream(client.getInputStream()));
-			streamOut = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()));
-			
-			//reading from client
-			String msg = "";
-			
-			while(!msg.equals(".over"))
-			{
-				try
-				{
-					msg = streamIn.readUTF();
-					System.out.println(msg);
-					
-					//writing message back
-					streamOut.writeUTF(msg.toUpperCase());
-				}
-	            catch(IOException i) 
-	            { 
-	                System.out.println(i); 
-	                break;
-	            } 
-			}
-			
-			//closing connection
-			System.out.println("Closing connection"); 
-            client.close(); 
-            streamIn.close();
-			
-			
-		}
-		catch(IOException e)
-		{  
-			System.out.println("Error: " + e.getMessage()); 
-		}
-		
-	}
-	*/
 }

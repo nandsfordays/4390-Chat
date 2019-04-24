@@ -5,6 +5,9 @@ import java.net.*;
 import java.io.*;
 import java.util.Scanner;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class Client {
 	
 	public static void main(String[] args) throws Exception 
@@ -12,8 +15,6 @@ public class Client {
 		//reads port number
 		Scanner scan = new Scanner(System.in);
 		int portnum = -1;
-		String msg = "";
-		int state = -1;
 		
 		try
 		{
@@ -29,19 +30,23 @@ public class Client {
 		
 		
 		//ON LEVEL - server and client are equals
-        try (Socket socket = new Socket("127.0.0.1", portnum)) 
+		Socket socket = new Socket("127.0.0.1", portnum);
+        try 
         {
             System.out.println("Enter lines of text");  
             
-            Scanner in = new Scanner(socket.getInputStream());
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            ExecutorService pool = Executors.newFixedThreadPool(1);
             
-            //handler - loops and checks for input on console and server
-            while (state != 0) 
-            {
-            	if(scan.hasNextLine()) //reading from console and sending to server
+            pool.execute(new ChatClient(socket));
+            
+            //CODE for reading from console
+            String msg = "";
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+    		while(true)
+    		{
+    			if(scan.hasNextLine()) //reading from console and sending to server
                 {
-                	state = 1; 
+                	
                 	//read from console
                 	msg = scan.nextLine();
                 	
@@ -61,10 +66,53 @@ public class Client {
             		}
                     
                 }
+    		}
+            
+            
+        }
+        catch(Exception e)
+		{
+			System.out.println("Error :" + e.getMessage());
+		}
+        
+        scan.close();
+        
+        
+    }
+	
+	
+	
+	
+	private static class ChatClient implements Runnable {
+        private Socket socket;
+        
+        //reading from console
+        //Scanner console = new Scanner(System.in);
+        
+        //constructor
+        public ChatClient(Socket socket) 
+        {
+            this.socket = socket;
+        }
+
+        //thread part. ON LEVEL - both server and client should be equals
+        @Override
+        public void run() 
+        {
+        	try
+        	{
+        		Scanner in = new Scanner(socket.getInputStream());
+        		PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+        		String msg = "";
+            
+        		//handler - loops and checks for input on console and server
+        		while (true) 
+        		{
+            	
             	
             	if(in.hasNextLine()) //reading from server and sending to console
                 {
-                	state = 2; 
+                	
                 	//read from server
                 	msg = in.nextLine();
                 	
@@ -75,7 +123,7 @@ public class Client {
             		}
                 	
                 	//send to console
-                    System.out.println(msg);
+                    System.out.println("Server: "+msg);
                     
                     //exit condition
                     if(msg.equals(".over"))
@@ -93,110 +141,13 @@ public class Client {
 			System.out.println("Error :" + e.getMessage());
 		}
         
-        scan.close();
-        
-        
-    }
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	/*
-	
-	private Socket socket = null;
-	private Scanner streamIn = null;
-	private DataOutputStream streamOut = null;
-	private DataInputStream socketIn = null;
-	
-	public static void main(String args[])
-	{
-		Client myClient = null;
-		Scanner scan = new Scanner(System.in);
-		   try
-		   {
-			   System.out.println("Please enter an integer for the port number.");
-			   int portnum = scan.nextInt();
-			   scan.close();
-			   myClient = new Client("127.0.0.1",portnum);
-		   }
-		   catch(Exception e)
-		   {
-			   System.out.println("Error reading port number. Please enter an integer.");
-		   }
+        //scan.close();
+        	
+        	
+        	
+        }
 	}
 	
-	//constructor
-	public Client(String address, int port)
-	{
-		try
-		{
-			//setup
-			socket = new Socket(address,port);
-			streamIn = new Scanner(System.in);
-			streamOut = new DataOutputStream(socket.getOutputStream());
-			socketIn = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-			
-			//write to socket
-			String msg = "";
-			
-			while(!msg.equals(".over"))
-			{
-				try 
-				{
-					if(streamIn.hasNext())
-					{
-						msg = streamIn.next();
-						streamOut.writeUTF(msg);
-					}
-					else //hard coded message in case read fails
-					{
-						msg = "error reading string";
-						streamOut.writeUTF(msg);
-					}
-					
-					//reading from server
-					msg = socketIn.readUTF();
-					System.out.println(msg);
-				}
-				catch(Exception e)
-				{
-					System.out.println("Error :" + e.getMessage());
-				}
-			}
-			
-			//close connection
-			try
-	        { 
-	            streamIn.close(); 
-	            streamOut.close(); 
-	            socket.close(); 
-	        } 
-	        catch(IOException i) 
-	        { 
-	            System.out.println(i); 
-	        } 
-			
-		}
-		catch(Exception e)
-		{
-			System.out.println("Error: " + e.getMessage());
-		}
-		
-		
-		
-		
-	}
 	
-	*/
 	
 }
