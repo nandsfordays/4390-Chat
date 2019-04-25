@@ -4,12 +4,13 @@
 import java.net.*;
 import java.io.*;
 import java.util.Scanner;
-
+import java.lang.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Client {
 	
+	//console to server
 	public static void main(String[] args) throws Exception 
 	{
 		//reads port number
@@ -34,10 +35,12 @@ public class Client {
         try 
         {
             System.out.println("Enter lines of text");  
-            
-            ExecutorService pool = Executors.newFixedThreadPool(1);
+        	System.out.println("Enter \".over\" to disconnect.");
+        	
+            ExecutorService pool = Executors.newFixedThreadPool(2);
             
             pool.execute(new ChatClient(socket));
+            pool.execute(new HeartBeat(socket));
             
             //CODE for reading from console
             String msg = "";
@@ -55,9 +58,15 @@ public class Client {
             		{
             			continue;
             		}
+                	if(msg.length() > 150) //control message length
+            		{
+            			System.out.println("System: Please limit messages to 150 characters");
+            			System.out.println("System: First 150 characters will be sent.");
+            			msg = msg.substring(0,149);
+            		}
                 	
                 	//send to server
-                    out.println(msg);
+                    out.println("m" + msg); //normal message
                     
                     //exit condition
                     if(msg.equals(".over"))
@@ -83,7 +92,7 @@ public class Client {
 	
 	
 	
-	
+	//reads from server
 	private static class ChatClient implements Runnable {
         private Socket socket;
         
@@ -105,7 +114,9 @@ public class Client {
         		Scanner in = new Scanner(socket.getInputStream());
         		//PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
         		String msg = "";
-            
+        		String header = "";
+            	long sysTime = System.currentTimeMillis();
+        		
         		//handler - loops and checks for input on console and server
         		while (true) 
         		{
@@ -116,12 +127,29 @@ public class Client {
 	                	
 	                	//read from server
 	                	msg = in.nextLine();
+	                	header = msg.substring(0,1);
+                		msg = msg.substring(1);
 	                	
 	                	//ignore empty string
 	                	if(msg.equals(""))
 	            		{
 	            			continue;
 	            		}
+	                	//handles heartbeat
+                		if(header.equals("b"))
+                		{
+                			sysTime = System.currentTimeMillis();
+                			//System.out.println("beat");
+                			continue;
+                		}
+                		else
+                		{
+                			if((System.currentTimeMillis() - sysTime) > 2000)  //no beat for 4 seconds
+                			{
+                				System.out.println("No heartbeat from Server. Disconnecting.");
+                				break;
+                			}
+                		}
 	                	
 	                	//send to console
 	                    System.out.println("Server: "+msg);
@@ -146,6 +174,55 @@ public class Client {
         }
 	}
 	
+	//sends to Server
+	private static class HeartBeat implements Runnable {
+        private Socket socket;
+        
+        
+        //constructor
+        public HeartBeat(Socket socket) 
+        {
+            this.socket = socket;
+        }
+
+        //thread part
+        @Override
+        public void run() 
+        {
+        	
+        	try 
+            {
+        		PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+        		
+        		while(true)
+                {
+                	Thread.sleep(1000);
+            		//sends to client
+            		out.println("ba"); //sending an empty header
+                	
+                }
+                
+            } 
+            catch (Exception e) 
+            {
+                System.out.println("Error:" + socket);
+            } 
+            finally 
+            {
+                try 
+                {
+                	socket.close(); 
+                	
+                } 
+                catch (IOException e) 
+                {
+                	
+                }
+                
+                System.out.println("Closed: " + socket);
+            }
+        }
+    }
 	
 	
 }
